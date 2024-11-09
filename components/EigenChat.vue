@@ -2,6 +2,19 @@
   <v-card class="eigen-chat">
     <div class="chat-container">
       <div class="chat-messages" ref="messagesContainer">
+        <div v-if="chatHistory.length === 0" class="starter-questions">
+          <h3 class="text-subtitle-1 mb-4">Start a conversation:</h3>
+          <v-chip
+            v-for="question in starterQuestions"
+            :key="question"
+            class="ma-2"
+            color="primary"
+            variant="outlined"
+            @click="handleStarterQuestion(question)"
+          >
+            {{ question }}
+          </v-chip>
+        </div>
         <div v-for="message in chatHistory" :key="message.id" class="message" :class="message.role">
           <v-card :color="message.role === 'user' ? 'primary' : 'grey-lighten-3'" class="message-card">
             <v-card-text>
@@ -185,6 +198,20 @@ const sendMessage = async () => {
 onMounted(() => {
   scrollToBottom()
 })
+
+// Add starter questions
+const starterQuestions = [
+  "What services do you offer?",
+  "Tell me about your team",
+  "How can we work together?",
+  "What are your areas of expertise?"
+]
+
+// Add handler for starter questions
+const handleStarterQuestion = (question: string) => {
+  userInput.value = question
+  sendMessage()
+}
 </script>
 
 <style scoped>
@@ -262,5 +289,15 @@ onMounted(() => {
   margin-left: auto;
   margin-right: auto;
   max-width: 100%;
+}
+
+.starter-questions {
+  text-align: center;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.starter-questions h3 {
+  color: rgba(0, 0, 0, 0.7);
 }
 </style> 
