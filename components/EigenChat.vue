@@ -1,44 +1,61 @@
 <template>
-  <div class="eigen-chat">
+  <v-card class="eigen-chat">
     <div class="chat-container">
       <div class="chat-messages" ref="messagesContainer">
         <div v-for="message in chatHistory" :key="message.id" class="message" :class="message.role">
-          <div class="message-content">
-            {{ message.content }}
-          </div>
-          <div class="message-timestamp">
-            {{ formatTimestamp(message.timestamp) }}
-          </div>
+          <v-card :color="message.role === 'user' ? 'primary' : 'grey-lighten-3'" class="message-card">
+            <v-card-text>
+              {{ message.content }}
+              <div class="message-timestamp">
+                {{ formatTimestamp(message.timestamp) }}
+              </div>
+            </v-card-text>
+          </v-card>
         </div>
         <div v-if="isLoading" class="message assistant loading">
-          <div class="loading-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+          <v-card color="grey-lighten-3" class="message-card">
+            <v-card-text>
+              <div class="loading-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </v-card-text>
+          </v-card>
         </div>
       </div>
       
-      <div class="error-message" v-if="error">
+      <v-alert
+        v-if="error"
+        type="error"
+        class="ma-2"
+      >
         {{ error }}
-      </div>
+      </v-alert>
       
       <div class="chat-input">
-        <textarea 
+        <v-textarea
           v-model="userInput"
           @keydown.enter.prevent="sendMessage"
           placeholder="Type your message..."
           :disabled="isLoading"
-        ></textarea>
-        <button 
-          @click="sendMessage" 
+          rows="1"
+          auto-grow
+          hide-details
+          density="comfortable"
+          class="mr-2"
+        ></v-textarea>
+        <v-btn
+          @click="sendMessage"
           :disabled="isLoading || !userInput.trim()"
+          color="primary"
+          :loading="isLoading"
         >
           Send
-        </button>
+        </v-btn>
       </div>
     </div>
-  </div>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -132,15 +149,13 @@ onMounted(() => {
 .eigen-chat {
   max-width: 800px;
   margin: 0 auto;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
+  height: 80vh;
 }
 
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 80vh;
+  height: 100%;
 }
 
 .chat-messages {
@@ -152,49 +167,24 @@ onMounted(() => {
 .chat-input {
   display: flex;
   padding: 20px;
-  border-top: 1px solid #ddd;
   background: #f9f9f9;
-}
-
-.chat-input textarea {
-  flex-grow: 1;
-  margin-right: 10px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  resize: none;
-}
-
-.chat-input button {
-  padding: 10px 20px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.chat-input button:hover {
-  background: #0056b3;
 }
 
 .message {
   margin-bottom: 1rem;
-  padding: 10px;
-  border-radius: 8px;
   max-width: 80%;
 }
 
 .message.user {
   margin-left: auto;
-  background-color: #007bff;
-  color: white;
 }
 
 .message.assistant {
   margin-right: auto;
-  background-color: #f0f0f0;
-  color: #333;
+}
+
+.message-card {
+  border-radius: 12px !important;
 }
 
 .message-timestamp {
@@ -224,25 +214,5 @@ onMounted(() => {
 @keyframes bounce {
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
-}
-
-.error-message {
-  color: #dc3545;
-  padding: 10px;
-  text-align: center;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  margin: 10px;
-  border-radius: 4px;
-}
-
-.chat-input textarea:disabled,
-.chat-input button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.message.assistant.streaming {
-  opacity: 0.7;
 }
 </style> 
