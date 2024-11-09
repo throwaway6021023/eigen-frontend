@@ -14,6 +14,7 @@ export const useChat = () => {
   const config = useRuntimeConfig()
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const sessionId = ref<string>(crypto.randomUUID())
 
   const sendChatMessage = async (
     message: string,
@@ -29,7 +30,10 @@ export const useChat = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ 
+          message,
+          session_id: sessionId.value 
+        }),
       })
 
       if (!response.ok) {
@@ -82,5 +86,6 @@ export const useChat = () => {
     sendChatMessage,
     isLoading,
     error,
+    sessionId: readonly(sessionId),
   }
 } 
