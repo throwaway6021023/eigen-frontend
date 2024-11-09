@@ -3,6 +3,10 @@ interface ChatMessage {
   content: string
   role: 'user' | 'assistant' | 'component'
   timestamp: Date
+  component?: {
+    name: string
+    props: Record<string, any>
+  }
 }
 
 interface ChatResponse {
@@ -62,6 +66,13 @@ export const useChat = () => {
               if (parsed.event === 'data' && parsed.data) {
                 fullResponse += parsed.data
                 onChunk?.(parsed.data)
+              } else if (parsed.event === 'component' && parsed.data) {
+                const componentData = JSON.parse(parsed.data)
+                onChunk?.(JSON.stringify({
+                  type: 'component',
+                  component: componentData.component,
+                  props: componentData.props
+                }))
               }
             } catch (e) {
               console.error('Error parsing chunk:', e)

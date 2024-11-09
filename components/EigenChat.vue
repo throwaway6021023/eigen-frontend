@@ -5,7 +5,15 @@
         <div v-for="message in chatHistory" :key="message.id" class="message" :class="message.role">
           <v-card :color="message.role === 'user' ? 'primary' : 'grey-lighten-3'" class="message-card">
             <v-card-text>
-              {{ message.content }}
+              <template v-if="message.component">
+                <component
+                  :is="resolveComponent(message.component.name)"
+                  v-bind="message.component.props"
+                />
+              </template>
+              <template v-else>
+                {{ message.content }}
+              </template>
               <div class="message-timestamp">
                 {{ formatTimestamp(message.timestamp) }}
               </div>
@@ -59,11 +67,17 @@
 </template>
 
 <script setup lang="ts">
+import ContactForm from './ContactForm.vue'
+
 interface ChatMessage {
   id: string
   content: string
   role: 'user' | 'assistant' | 'component'
   timestamp: Date
+  component?: {
+    name: string
+    props: Record<string, any>
+  }
 }
 
 const userInput = ref('')
@@ -87,6 +101,13 @@ const formatTimestamp = (date: Date) => {
     hour: 'numeric',
     minute: 'numeric'
   }).format(date)
+}
+
+const resolveComponent = (name: string) => {
+  const components = {
+    contact_form: ContactForm
+  }
+  return components[name as keyof typeof components]
 }
 
 const sendMessage = async () => {
@@ -120,8 +141,23 @@ const sendMessage = async () => {
       currentMessage,
       (chunk) => {
         if (currentStreamingMessage.value) {
-          currentStreamingMessage.value.content += chunk
-          scrollToBottom()
+          try {
+            const parsed = JSON.parse(chunk)
+            if (parsed.type === 'component') {
+              currentStreamingMessage.value.component = {
+                name: parsed.component,
+                props: parsed.props
+              }
+              currentStreamingMessage.value.role = 'component'
+            } else {
+              currentStreamingMessage.value.content += chunk
+            }
+            scrollToBottom()
+          } catch {
+            // If it's not JSON, treat it as regular text
+            currentStreamingMessage.value.content += chunk
+            scrollToBottom()
+          }
         }
       }
     )
@@ -214,5 +250,11 @@ onMounted(() => {
 @keyframes bounce {
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
+}
+
+.message.component {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 100%;
 }
 </style> 
