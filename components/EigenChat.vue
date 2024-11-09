@@ -68,6 +68,9 @@
 
 <script setup lang="ts">
 import ContactForm from './ContactForm.vue'
+import OpenRoles from './OpenRoles.vue'
+import TeamMembers from './TeamMembers.vue'
+import CaseStudyQuote from './CaseStudyQuote.vue'
 
 interface ChatMessage {
   id: string
@@ -105,7 +108,10 @@ const formatTimestamp = (date: Date) => {
 
 const resolveComponent = (name: string) => {
   const components = {
-    contact_form: ContactForm
+    contact_form: ContactForm,
+    open_roles: OpenRoles,
+    team_members: TeamMembers,
+    case_study_quote: CaseStudyQuote
   }
   return components[name as keyof typeof components]
 }
